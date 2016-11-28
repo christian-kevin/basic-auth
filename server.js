@@ -17,6 +17,7 @@ app.use(cookieParser('12345-67890-09876-54321')); // secret key
 function auth(req,res,next) {
     console.log(req.headers);
 
+    if(!req.signedCookies.user){
     var authHeader = req.headers.authorization;
 
     if(!authHeader){
@@ -31,11 +32,22 @@ function auth(req,res,next) {
     var pass = auth[1];
 
     if (user == 'admin' && pass == 'password'){
+        res.cookie('user','admin',{signed:true}); // assign cookie
         next(); //authorized
     } else {
         var err = new Error('You are not authenticated!');
         err.status = 401;
         next(err);
+    }
+    } else{
+        if(req.signedCookies.user ==='admin'){
+            console.log(req.signedCookies);
+            next();
+        } else{
+            var err = new Error('You are not authenticated!');
+            err.status=401;
+            next(err);
+        }
     }
 }
 
